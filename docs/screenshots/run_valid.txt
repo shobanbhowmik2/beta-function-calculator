@@ -1,0 +1,19 @@
+$ python3 src/cli.py
+Beta Function Calculator  (SOEN 6011 F6, Deliverable 1 prototype)
+Computes B(x, y) = integral_0^1 t^(x-1) (1-t)^(y-1) dt  for  x > 0, y > 0.
+Type 'h' for help or 'q' to quit at any prompt.
+
+  x (> 0): 2
+  y (> 0): 3
+  B(2, 3) = 0.0833333   (to 6 significant figures)
+
+  x (> 0): 0.5
+  y (> 0): 0.5
+  B(0.5, 0.5) = 3.14159   (to 6 significant figures)
+
+  x (> 0): 10
+  y (> 0): 10
+  B(10, 10) = 1.08251e-06   (to 6 significant figures)
+
+  x (> 0): q
+Goodbye.

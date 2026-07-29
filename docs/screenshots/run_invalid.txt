@@ -1,0 +1,22 @@
+$ python3 src/cli.py
+Beta Function Calculator  (SOEN 6011 F6, Deliverable 1 prototype)
+Computes B(x, y) = integral_0^1 t^(x-1) (1-t)^(y-1) dt  for  x > 0, y > 0.
+Type 'h' for help or 'q' to quit at any prompt.
+
+  x (> 0): abc
+  ! x = 'abc' is not a number. Enter a decimal value, e.g. 2.5
+  x (> 0): 0
+  ! x = 0 is outside the domain. This calculator supports x > 0 and y > 0 only.
+  x (> 0): -2
+  ! x = -2 is outside the domain. This calculator supports x > 0 and y > 0 only.
+  x (> 0): 3
+  y (> 0): 
+  ! y was empty. Enter a number greater than 0, e.g. 2.5
+  y (> 0): 1e6
+  ! y = 1e+06 exceeds the supported bound of 10000. Enter a value in (0, 10000].
+  y (> 0): 2
+  B(3, 2) = 0.0833333   (to 6 significant figures)
+
+  x (> 0): 2.5
+  y (> 0): q
+Goodbye.

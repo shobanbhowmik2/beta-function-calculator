@@ -1,0 +1,19 @@
+x,y,exact_form,expected_value,source,trusted
+1,1,1,1.0,closed-form,yes
+1,2,1/2,0.5,closed-form,yes
+2,1,1/2,0.5,closed-form,yes
+2,2,1/6,0.16666666666666666,closed-form,yes
+2,3,1/12,0.08333333333333333,closed-form,yes
+3,2,1/12,0.08333333333333333,closed-form,yes
+2,4,1/20,0.05,closed-form,yes
+3,3,1/30,0.03333333333333333,closed-form,yes
+4,3,1/60,0.016666666666666666,closed-form,yes
+5,3,1/105,0.009523809523809525,closed-form,yes
+0.5,0.5,pi,3.141592653589793,closed-form,yes
+0.5,1,2,2.0,closed-form,yes
+0.5,2,4/3,1.3333333333333333,closed-form,yes
+1.5,0.5,pi/2,1.5707963267948966,closed-form,yes
+1.5,1.5,pi/8,0.39269908169872414,closed-form,yes
+2.5,1.5,pi/16,0.19634954084936207,closed-form,yes
+10,10,(9!)^2/19!,1.0825088224469e-06,factorial-ratio (lgamma-verified),yes
+0.2,0.3,-,7.748481388736760,numeric (lgamma-verified),yes

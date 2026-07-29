@@ -1,0 +1,63 @@
+// Algorithm-selection mind map (D1-P4.1)
+// Editable source. Render:
+//   dot -Tpng algorithm_selection.dot -o algorithm_selection.png
+//   dot -Tpdf algorithm_selection.dot -o algorithm_selection.pdf
+// Meaning is carried by text labels ("+"/"-", "CHOSEN"/"REJECT"), not colour
+// alone, for accessibility (ACC-03). Evidence is the verified P3 comparison.
+
+digraph AlgorithmSelection {
+  rankdir=LR;
+  graph [splines=true, nodesep=0.28, ranksep=0.9, fontname="Helvetica"];
+  node  [fontname="Helvetica", shape=box, style="rounded,filled", fillcolor="#ffffff", color="#555555"];
+  edge  [fontname="Helvetica", color="#777777"];
+
+  root [label="Algorithm for B(x, y)\n(select one to implement first)", shape=box,
+        style="rounded,filled", fillcolor="#cfe2f3", penwidth=2];
+
+  // ---- Branch 1: Candidate algorithms ----
+  cand [label="Candidate algorithms", fillcolor="#eeeeee"];
+  algA [label="A. Euler-integral\nadaptive Simpson quadrature", fillcolor="#fff2cc"];
+  algB [label="B. Gamma identity\nLanczos lnGamma, log domain", fillcolor="#d9ead3"];
+
+  a_p1 [label="+ Intuitive 'area under curve'"];
+  a_p2 [label="+ Uses only pow + arithmetic"];
+  a_d1 [label="- FAILS ACC-01 near singular\nendpoints (B(0.2,0.3): rel err 2.7e-3)"];
+  a_d2 [label="- O(N) work; slower near singularities"];
+
+  b_p1 [label="+ ~1e-14 rel err across whole domain\n(18/18 reference values, ACC-01)"];
+  b_p2 [label="+ O(1) constant time (PERF-01)"];
+  b_p3 [label="+ Log domain avoids Gamma overflow (REL-02)"];
+  b_p4 [label="+ Fixed loop -> bounded work (REL-03)"];
+  b_d1 [label="- Less intuitive to persona"];
+  b_d2 [label="- More from-scratch effort in D2\n(exp, ln, sin + Lanczos)"];
+
+  // ---- Branch 2: Evaluation criteria ----
+  crit [label="Evaluation criteria", fillcolor="#eeeeee"];
+  cr1  [label="Accuracy (ACC-01, <= 1e-6)"];
+  cr2  [label="Domain coverage (x,y > 0)"];
+  cr3  [label="Numerical stability (REL-02)"];
+  cr4  [label="Implementation effort"];
+  cr5  [label="Fit for D2 from-scratch build"];
+  cr6  [label="Performance (PERF-01)"];
+  cr7  [label="Explainability to persona"];
+
+  // ---- Branch 3: Decision ----
+  dec    [label="Decision", fillcolor="#eeeeee"];
+  chosen [label="CHOSEN: Algorithm B\n(Gamma identity, log-domain Lanczos)",
+          fillcolor="#d9ead3", penwidth=2];
+  rej    [label="REJECT for now: Algorithm A\n(fails ACC-01 at singular corner)",
+          fillcolor="#f4cccc"];
+  why    [label="Why: only B meets ACC-01 uniformly\nAND REL-02/REL-03/PERF-01;\naccuracy outweighs A's intuitiveness"];
+  d2     [label="D2 note: B's exp/ln/sin become\nthe from-scratch targets (D-004)"];
+
+  // edges
+  root -> cand; root -> crit; root -> dec;
+
+  cand -> algA; cand -> algB;
+  algA -> a_p1; algA -> a_p2; algA -> a_d1; algA -> a_d2;
+  algB -> b_p1; algB -> b_p2; algB -> b_p3; algB -> b_p4; algB -> b_d1; algB -> b_d2;
+
+  crit -> cr1; crit -> cr2; crit -> cr3; crit -> cr4; crit -> cr5; crit -> cr6; crit -> cr7;
+
+  dec -> chosen; dec -> rej; dec -> why; dec -> d2;
+}
