@@ -28,6 +28,17 @@ project · **Version 0.2.0** (Deliverable 2).
   Verify with: `python3 -c "import tkinter; print(tkinter.TkVersion)"`.
 - No third-party packages. The mathematics uses **no library** — see *From scratch* below.
 
+## Running in GitHub Codespaces (no local install)
+
+This repo ships a `.devcontainer` with a browser-accessible desktop, so the Tkinter GUI
+is viewable without installing anything locally:
+
+1. On GitHub, click **Code → Codespaces → Create codespace on main**.
+2. Wait for the container to build; a **"Desktop (noVNC)"** port (6080) will auto-open
+   in a new browser tab — that's a full Linux desktop rendered in-browser.
+3. In the Codespace terminal, run `python3 src/gui.py`; the Tkinter window appears in
+   the noVNC desktop tab.
+
 ## Running
 
 Graphical interface (Deliverable 2):
