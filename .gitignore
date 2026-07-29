@@ -33,3 +33,6 @@ Thumbs.db
 .venv/
 venv/
 env/
+
+# Devcontainer feature lockfile (regenerated on first Codespace build)
+.devcontainer/devcontainer-lock.json
