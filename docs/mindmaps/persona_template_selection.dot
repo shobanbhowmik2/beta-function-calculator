@@ -1,0 +1,60 @@
+// Persona-template selection mind map (D1-P1.2)
+// Editable source. Render:  dot -Tpng persona_template_selection.dot -o persona_template_selection.png
+// Meaning is carried by text labels (not colour alone), for accessibility.
+
+digraph PersonaTemplateSelection {
+  rankdir=LR;
+  graph [splines=true, nodesep=0.28, ranksep=0.9, fontname="Helvetica"];
+  node  [fontname="Helvetica", shape=box, style="rounded,filled", fillcolor="#ffffff", color="#555555"];
+  edge  [fontname="Helvetica", color="#777777"];
+
+  root [label="Persona Template\nfor Beta Function Calculator", shape=box,
+        style="rounded,filled", fillcolor="#cfe2f3", penwidth=2];
+
+  // ---- Branch 1: Candidate templates ----
+  cand  [label="Candidate templates", fillcolor="#eeeeee"];
+  gd    [label="A. Goal-directed (Cooper)", fillcolor="#d9ead3"];
+  rb    [label="B. Role-based", fillcolor="#fff2cc"];
+  pp    [label="C. Proto / lightweight", fillcolor="#fce5cd"];
+
+  gd_a1 [label="+ Centres goals & pain points\n=> strong requirement traceability"];
+  gd_a2 [label="+ Fits a needs-driven utility"];
+  gd_d1 [label="- Can bloat if over-detailed"];
+
+  rb_a1 [label="+ Simple; good for org/role context"];
+  rb_d1 [label="- Weak on individual goals/pains"];
+  rb_d2 [label="- Thin traceability to requirements"];
+
+  pp_a1 [label="+ Fast; assumption-friendly"];
+  pp_a2 [label="+ Labels evidence vs assumption"];
+  pp_d1 [label="- Least evidence; shallow detail"];
+
+  // ---- Branch 2: Evaluation criteria ----
+  crit  [label="Evaluation criteria", fillcolor="#eeeeee"];
+  cr1   [label="Relevance to a computation tool"];
+  cr2   [label="Realism"];
+  cr3   [label="Conciseness (1-page)"];
+  cr4   [label="Traceability to requirements"];
+  cr5   [label="Accessibility support"];
+  cr6   [label="Fit for a scientific calculator"];
+
+  // ---- Branch 3: Decision ----
+  dec   [label="Decision", fillcolor="#eeeeee"];
+  chosen[label="CHOSEN: Goal-directed,\ntrimmed to a 1-page card",
+         fillcolor="#d9ead3", penwidth=2];
+  graft [label="Graft from Proto:\nexplicit assumption labels"];
+  rej   [label="Reject Role-based:\nweak goal/pain traceability"];
+  why   [label="Why: traceability + relevance\noutweigh proto's speed"];
+
+  // edges
+  root -> cand; root -> crit; root -> dec;
+
+  cand -> gd; cand -> rb; cand -> pp;
+  gd -> gd_a1; gd -> gd_a2; gd -> gd_d1;
+  rb -> rb_a1; rb -> rb_d1; rb -> rb_d2;
+  pp -> pp_a1; pp -> pp_a2; pp -> pp_d1;
+
+  crit -> cr1; crit -> cr2; crit -> cr3; crit -> cr4; crit -> cr5; crit -> cr6;
+
+  dec -> chosen; dec -> graft; dec -> rej; dec -> why;
+}
