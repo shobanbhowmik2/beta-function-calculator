@@ -11,7 +11,7 @@ library) with a **Tkinter graphical interface**.
 Course: SOEN 6011 (Software Engineering Processes), Section CC, Summer 2026 · Individual
 project · **Version 0.2.0** (Deliverable 2).
 
-**Public repository:** `<PUBLIC-REPO-URL>`  <!-- paste your GitHub URL after pushing -->
+**Public repository:** `https://github.com/shobanbhowmik2/beta-function-calculator`
 
 ## Status
 
