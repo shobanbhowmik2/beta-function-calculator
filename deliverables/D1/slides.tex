@@ -1,0 +1,381 @@
+\documentclass[aspectratio=169]{beamer}
+
+% ---------------------------------------------------------------- packages --
+\usetheme{Madrid}
+\usecolortheme{whale}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\graphicspath{{../../docs/mindmaps/}{../../docs/screenshots/}}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+\setbeamerfont{footline}{size=\tiny}
+
+\definecolor{codegray}{gray}{0.95}
+\lstdefinestyle{mini}{
+  basicstyle=\ttfamily\scriptsize, backgroundcolor=\color{codegray},
+  frame=single, framerule=0pt, breaklines=true, columns=fullflexible,
+  keepspaces=true, aboveskip=2pt, belowskip=2pt,
+}
+
+% ----------------------------------------------------------------- metadata --
+\title[F6 Beta Function --- D1]{Function F6: The Real Beta Function $B(x,y)$}
+\subtitle{Deliverable 1 --- Persona, Requirements, Algorithms, CLI}
+\author{SOEN 6011}
+\institute{Software Engineering Processes}
+\date{2026-07-15}
+
+\begin{document}
+
+\begin{frame}[plain]
+  \titlepage
+  \centering\footnotesize
+  $B(x,y)=\displaystyle\int_0^1 t^{x-1}(1-t)^{y-1}\,dt
+         =\frac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}$,\quad domain $x>0,\,y>0$.
+\end{frame}
+
+% -------------------------------------------------------------------- outline
+\begin{frame}{Outline}
+  \begin{columns}[t]
+    \column{0.5\textwidth}
+    \begin{enumerate}
+      \item Problem \& scope
+      \item Persona (P1)
+      \item Requirements (P2)
+      \item Two algorithms (P3)
+    \end{enumerate}
+    \column{0.5\textwidth}
+    \begin{enumerate}\setcounter{enumi}{4}
+      \item Selection \& CLI (P4)
+      \item Verification \& limits
+      \item GAI prompts (C-03)
+    \end{enumerate}
+  \end{columns}
+  \vfill
+  \footnotesize This deck explains the \textbf{decisions}; full detail is in the report.
+\end{frame}
+
+% ------------------------------------------------------------------- problem
+\begin{frame}{Problem and scope}
+  \begin{block}{Function F6}
+    Real Beta function
+    $B(x,y)=\int_0^1 t^{x-1}(1-t)^{y-1}\,dt=\dfrac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}$.
+  \end{block}
+  \begin{itemize}
+    \item \textbf{Scope decision (D-001):} $x>0,\ y>0$ --- Euler integral finite and real.
+    \item \textbf{Out of scope (D1):} complex args, analytic continuation, incomplete Beta.
+    \item \textbf{Pipeline:} persona $\rightarrow$ requirements $\rightarrow$ two algorithms
+          $\rightarrow$ selection + CLI --- each stage feeds the next.
+  \end{itemize}
+\end{frame}
+
+% -------------------------------------------------------------------- persona
+\begin{frame}{Problem 1 --- Persona: Maya Fernandes}
+  \textbf{Decision (D-005):} goal-directed template (Cooper), trimmed to one card, with
+  explicit evidence \textbf{[E]} / synthesis \textbf{[S]} / assumption \textbf{[A]} tags.
+  \begin{columns}[T]
+    \column{0.52\textwidth}
+    \footnotesize
+    \textbf{Who:} 24 \textbf{[A]}, MSc Statistics + part-time RA; strong on Gamma/Beta
+    integrals, \emph{moderate} Python, but has \emph{never} driven a command line \textbf{[S]}.\smallskip
+
+    \textbf{Context:} personal laptop, works in Sheets/Jupyter between fitting models;
+    opens a terminal rarely; occasionally on a screen reader / larger fonts \textbf{[A]}.\smallskip
+
+    \textbf{Concrete task:} hand-checking a \emph{Bayesian} assignment --- needs
+    $1/B(2,5)$ for a $\mathrm{Beta}(2,5)$ prior, and spot-checks $B(2,3)=\tfrac1{12}$,
+    $B(0.5,0.5)=\pi$ --- wants the number in $<1$\,min, no code, no SciPy install.
+    \column{0.48\textwidth}
+    \footnotesize
+    \textbf{Goals}
+    \begin{itemize}\scriptsize
+      \item \textbf{G1} quick, trustworthy $B(x,y)$, no coding
+      \item \textbf{G3} know which inputs are valid
+    \end{itemize}
+    \textbf{Pains / needs}
+    \begin{itemize}\scriptsize
+      \item \textbf{N2} other tools gave a bare \texttt{inf} for large / edge inputs
+      \item \textbf{N5} screen-reader user: red/green-only feedback is invisible
+    \end{itemize}
+    \textbf{Anti-goals:} won't read source, install a library, or need complex args /
+    incomplete Beta.
+  \end{columns}
+  \medskip
+  \footnotesize Each specific \textbf{drives a requirement}: \texttt{inf}/edge$\to$VAL-01,
+  REL-02, ERR-01; screen reader$\to$ACC-03; $<1$\,min$\to$PERF-01; hand-checked
+  values$\to$demo. \emph{7 needs $\rightarrow$ requirements ($\ge 5$ required).}
+\end{frame}
+
+\begin{frame}{Problem 1 --- Template selection (mind map)}
+  \centering
+  \includegraphics[height=0.72\textheight]{persona_template_selection.pdf}\\
+  {\scriptsize Goal-directed vs.\ role-based vs.\ lightweight/proto --- \textbf{chosen:
+  goal-directed} for strongest goals/pains $\rightarrow$ requirements traceability;
+  grafted proto's [E]/[S]/[A] labelling.}
+\end{frame}
+
+% --------------------------------------------------------------- requirements
+\begin{frame}{Problem 2 --- Requirements (ISO/IEC/IEEE 29148)}
+  Imperative ``shall'' style, each singular + verifiable (decision~D-006).
+  \textbf{21 requirements}; selected highlights:
+  \begin{block}{Category-ID basis (kept simple)}
+    \footnotesize Each ID $=$ a short \textbf{category prefix} $+$ a zero-padded number,
+    grouped by 29148 requirement type: \texttt{FR} functional, \texttt{VAL} validation,
+    \texttt{ACC} accuracy, \texttt{REL} reliability, \texttt{PERF} performance,
+    \texttt{ERR} error handling, \texttt{USE} usability, \texttt{DOC} documentation ---
+    so any ID names its own category and stays traceable.
+  \end{block}
+  \begin{center}\footnotesize
+  \begin{tabular}{@{}lll@{}}
+    \toprule
+    ID & Requirement (abbreviated) & Verify\\
+    \midrule
+    VAL-01 & reject $x\le0$ or $y\le0$ & T\\
+    ACC-01 & rel.\ error $\le 10^{-6}$ vs.\ reference ($0<x,y\le50$) & T\\
+    ACC-02 & display 6 sig figs; no false precision & I\\
+    REL-02 & no \texttt{inf}/\texttt{nan} when value is finite & T\\
+    REL-03 & bounded work / guaranteed termination & A\\
+    ERR-01 & message: what was wrong + how to fix & T\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \footnotesize\textbf{Decisions:} quantified all vague terms; set tolerance $10^{-6}$ and
+  cap $10^4$ (D-007); resolved a REL-02/ACC-01 conflict via the VAL-04 cap.
+\end{frame}
+
+% ---------------------------------------------------------------- algorithms
+\begin{frame}[fragile]{Problem 3 --- Two genuinely different algorithms}
+  \begin{columns}[T]
+    \column{0.5\textwidth}
+    \textbf{A --- Euler integral} (adaptive Simpson)
+    \begin{lstlisting}[style=mini,basicstyle=\ttfamily\tiny]
+BETA_A(x, y, tol, maxDepth):
+  if x<=0 or y<=0: error   # VAL-01
+  f(t): return t^(x-1)*(1-t)^(y-1)
+  lo <- EPS if x<1 else 0  # inset
+  hi <- 1-EPS if y<1 else 1  # singular
+  return ADAPT(f, lo, hi, tol,
+            SIMPSON(f,lo,hi), 0, maxDepth)
+
+ADAPT(f, a, b, tol, whole, d, dMax):
+  m <- (a+b)/2
+  L <- SIMPSON(f,a,m); R <- SIMPSON(f,m,b)
+  if d>=dMax or |L+R-whole|<=15*tol:  # REL-03
+    return L+R + (L+R-whole)/15  # Richardson
+  return ADAPT(f,a,m,tol/2,L,d+1,dMax)
+       + ADAPT(f,m,b,tol/2,R,d+1,dMax)
+    \end{lstlisting}
+    {\tiny $O(N)$ evals; intuitive ``area under curve''.}
+    \column{0.5\textwidth}
+    \textbf{B --- Gamma identity} (Lanczos $\ln\Gamma$, log domain)
+    \begin{lstlisting}[style=mini,basicstyle=\ttfamily\tiny]
+BETA_B(x, y):
+  if x<=0 or y<=0: error   # VAL-01
+  return EXP( LNGAMMA(x) + LNGAMMA(y)
+              - LNGAMMA(x+y) )   # REL-02
+
+LNGAMMA(z):        # g=7, coeffs P[0..8]
+  if z < 0.5:                    # reflection
+    return LN(pi) - LN(|SIN(pi*z)|)
+           - LNGAMMA(1-z)
+  z <- z - 1
+  a <- P[0]
+  for i in 1..8:                 # fixed loop
+    a <- a + P[i]/(z+i)          #   -> REL-03
+  t <- z + 7.5
+  return 0.5*LN(2*pi)
+       + (z+0.5)*LN(t) - t + LN(a)
+    \end{lstlisting}
+    {\tiny $O(1)$; log domain avoids $\Gamma$ overflow.}
+  \end{columns}
+  \vspace{-6pt}
+  \begin{alertblock}{Verified difference (drives P4)}
+    \tiny Both coded vs.\ \texttt{lgamma}: B matches $\sim$10 digits everywhere;
+    \textbf{A fails ACC-01} near the singular corner --- $B(0.2,0.3)=7.7277$ vs.\ true
+    $7.7485$ (rel.\ err $2.7\times10^{-3}$).
+  \end{alertblock}
+\end{frame}
+
+% ---------------------------------------------------------------- selection
+\begin{frame}{Problem 4 --- Selection: Algorithm B (D-004)}
+  \begin{columns}[T]
+    \column{0.46\textwidth}
+    \textbf{Chosen: B.} Only candidate meeting ACC-01 \emph{uniformly} \emph{and}
+    REL-02, REL-03, PERF-01.\medskip
+
+    \textbf{A rejected} for this stage: fails ACC-01 at the singular corner.\medskip
+
+    \textbf{Trade-off accepted:} B needs a bit more D2 from-scratch work
+    ($\exp,\ln,\sin$) --- worth it, since accuracy is a \emph{must}.
+    \column{0.54\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{algorithm_selection.pdf}\\
+    {\scriptsize Evidence-based selection mind map}
+  \end{columns}
+\end{frame}
+
+% --------------------------------------------------------------------- CLI
+\begin{frame}[fragile]{Problem 4 --- CLI prototype (\texttt{src/cli.py})}
+  \begin{itemize}\small
+    \item Compute core (\texttt{beta}/\texttt{ln\_gamma}) \textbf{separated} from I/O
+          $\Rightarrow$ testable + reusable in D2.
+    \item Validates empty / non-numeric / $\le0$ / over-cap; 6 sig figs; helpful messages.
+    \item Uses only \texttt{log}, \texttt{exp}, \texttt{sin}, $\pi$ --- \emph{no}
+          \texttt{gamma}/\texttt{lgamma}/\texttt{beta} (the D2 from-scratch targets).
+  \end{itemize}
+  \begin{lstlisting}[style=mini]
+def beta(x, y):                       # Algorithm B, O(1)
+    if x <= 0 or y <= 0: raise ValueError("domain is x > 0 and y > 0")
+    return math.exp(beta_ln(x, y))    # log domain avoids overflow (REL-02)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Problem 4 --- Demo (genuine terminal transcripts)}
+  \begin{columns}[c]
+    \column{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{run_valid.png}\\
+    {\scriptsize Valid: $B(2,3)$, $B(0.5,0.5)=\pi$, $B(10,10)$}
+    \column{0.5\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{run_invalid.png}\\
+    {\scriptsize Invalid inputs $\rightarrow$ specific message, no crash}
+  \end{columns}
+\end{frame}
+
+% ------------------------------------------------------------- verification
+\begin{frame}{Verification \& known limitations}
+  \begin{block}{Harness \texttt{tests/verify\_d1.py} --- 15/15 pass}
+    \begin{itemize}\small
+      \item \textbf{ACC-01:} 18/18 reference values; worst rel.\ err $1.17\times10^{-14}$
+            ($\ll 10^{-6}$), incl.\ the corner where A failed.
+      \item \textbf{REL-01/02:} 0 crashes on malformed input; all finite on large inputs.
+      \item \textbf{PERF-01:} $\approx 1.3\,\mu$s/call ($\ll 1$\,s).
+    \end{itemize}
+  \end{block}
+  \textbf{Honest limits:} domain $x,y>0$ only; cap $10^4$; accuracy bounded by Lanczos
+  $g=7$; validated over $0<x,y\le50$; \texttt{math} primitives reimplemented in D2.
+  No correctness defect within the supported domain.
+\end{frame}
+
+% -------------------------------------------------------------------- GAI
+\begin{frame}{GAI prompts (constraint C-03)}
+  Tool: \textbf{Claude (Opus 4.8)} via Claude Code. Every problem used one
+  \textbf{CASTROFF} prompt --- \textbf{T}ask, \textbf{R}estrictions, \textbf{O}utput
+  format, \textbf{A}udience --- logged verbatim, with critical evaluation and independent
+  verification. Full text in \texttt{SOEN\_6011\_F6\_D1\_Prompts.md}.
+  \begin{center}\footnotesize
+  \begin{tabular}{@{}ll@{}}
+    \toprule
+    Problem & Prompt type\\
+    \midrule
+    P1 Persona & generative + decision-support (template compare $\rightarrow$ persona)\\
+    P2 Requirements & transformational (persona $\rightarrow$ 29148 reqs) + review\\
+    P3 Algorithms & generative + comparative (two language-neutral algorithms)\\
+    P4 Selection + CLI & decision-support (selection) + generative (Python CLI)\\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \footnotesize \textbf{Shared AUDIENCE:} SOEN 6011 professor, TAs, grad SE students ---
+  so output must be evidence-based, traceable, and verifiable. AI output was never
+  accepted verbatim.
+\end{frame}
+
+\begin{frame}{GAI prompt --- P1 Persona}
+  \small \textbf{Type:} generative + decision-support.
+  \begin{description}\footnotesize
+    \item[TASK] Compare $\ge 3$ persona templates (goal-directed, role-based, lightweight)
+      as a mind map and recommend one for a $B(x,y)$ calculator user; then draft one
+      primary persona (name, role, skills, goals, education, tasks, environment,
+      platform, Beta-specific needs/pains) $+$ a usage scenario; label evidence vs.\
+      synthesis vs.\ assumption.
+    \item[RESTRICTIONS] No invented statistics; not a real interviewed person; every
+      attribute traceable to $\ge 5$ later requirements; no implementation tech; keep it
+      specific, not boilerplate.
+    \item[OUTPUT] Template mind-map outline $+$ decision, then a structured persona card
+      $+$ assumptions list $+$ 3--5 sentence scenario (headings so the two parts split
+      across slides).
+  \end{description}
+\end{frame}
+
+\begin{frame}{GAI prompt --- P2 Requirements}
+  \small \textbf{Type:} generative + transformational, with review. \emph{Informed by P1.}
+  \begin{description}\footnotesize
+    \item[TASK] Express requirements in ISO/IEC/IEEE 29148 style, \emph{informed by the
+      pasted P1 persona}; one consistent statement style, category-grouped IDs; record
+      id / statement / rationale (persona trace) / priority / verification; cover input,
+      compute, display, retry, exit, and rejection of invalid inputs; then review against
+      the 29148 quality characteristics.
+    \item[RESTRICTIONS] No algorithm, library, or language inside a requirement; no vague
+      terms unless quantified; each requirement singular and independently verifiable;
+      only persona-justified.
+    \item[OUTPUT] Requirements table (ID, statement, rationale, priority, verification)
+      $+$ a separate assumptions list $+$ a review-findings table; LaTeX-reproducible.
+  \end{description}
+\end{frame}
+
+\begin{frame}{GAI prompt --- P3 Algorithms}
+  \small \textbf{Type:} generative + comparative. \emph{Informed by P2.}
+  \begin{description}\footnotesize
+    \item[TASK] Specify two genuinely different, language-neutral algorithms satisfying the
+      pasted P2 IDs --- \textbf{A} adaptive-quadrature of the Euler integral (endpoint
+      handling for $0<x,y<1$); \textbf{B} the Gamma identity via a Lanczos $\ln\Gamma$ in
+      the log domain. For each: inputs, pre/postconditions, tolerance, validation,
+      steps, stopping condition, max-work safeguard, complexity, weaknesses, worked
+      trace; confirm they are substantially different.
+    \item[RESTRICTIONS] No real-language syntax; every loop/recursion must terminate or
+      have a max-work cap; no built-in Beta/Gamma; make trade-offs explicit.
+    \item[OUTPUT] Two pseudocode listings, each $+$ pre/post, complexity/limits, trace;
+      then a ``how A and B differ'' table.
+  \end{description}
+\end{frame}
+
+\begin{frame}{GAI prompt --- P4 Selection + CLI}
+  \small \textbf{Type:} decision-support + generative. \emph{Informed by P3.}
+  \begin{description}\footnotesize
+    \item[TASK] (1)~Selection: mind-map compare the two P3 algorithms over accuracy,
+      domain coverage, stability, effort, D2 from-scratch fit, performance, and
+      explainability; state the choice and why the other is rejected. (2)~A Python 3 CLI
+      of the chosen algorithm: I/O separated from compute, prompts $+$ domain hint,
+      validate, compute, formatted precision, helpful messages, sample runs.
+    \item[RESTRICTIONS] Selection from the criteria, not preference; consistent with P2
+      and anticipates the D2 from-scratch constraint; runs from a terminal; no unhandled
+      traceback; compute core callable independently; flag math calls needing a D2
+      replacement.
+    \item[OUTPUT] Selection mind-map $+$ decision, full runnable code, and sample runs
+      (valid / boundary / invalid) $+$ the run command.
+  \end{description}
+\end{frame}
+
+% ------------------------------------------------------------------- closing
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item A \textbf{specific persona} (Maya) drove \textbf{21 traceable 29148
+          requirements}, two genuinely different algorithms, an evidence-based choice of
+          Algorithm~B, and a robust CLI --- each stage justified the next.
+    \item The selection followed from \textbf{verified evidence} --- A fails ACC-01 at the
+          singular corner --- not from preference.
+    \item Result meets ACC-01 with a $\sim10^{8}\times$ margin; \textbf{15/15} checks pass;
+          known limits (domain, cap, Lanczos $g{=}7$) stated honestly.
+    \item Every GAI use was a documented CASTROFF prompt, independently verified ---
+          no output accepted verbatim (C-03).
+  \end{itemize}
+  \vfill
+  \centering\small
+  \textbf{References:} ISO/IEC/IEEE 29148~\cite{iso29148};
+  Lanczos~\cite{lanczos1964gamma}; NIST DLMF \S5.12~\cite{dlmf512};
+  Cooper~\cite{cooper2004inmates}.
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+  \footnotesize
+  \bibliographystyle{ieeetr}
+  \bibliography{references}
+\end{frame}
+
+\end{document}
