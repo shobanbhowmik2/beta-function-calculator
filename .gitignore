@@ -1,0 +1,35 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# LaTeX build artefacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Editor / IDE settings (source must not depend on any IDE)
+.vscode/
+.idea/
+*.swp
+
+# Submission archives (regenerated from source)
+*.zip
+
+# Virtual environments
+.venv/
+venv/
+env/
